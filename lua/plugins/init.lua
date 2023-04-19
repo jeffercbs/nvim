@@ -1,38 +1,50 @@
-local lazip = require "lua.plugins.lazip".lazip
+local function lazip(name, opts)
+  local ok, module = pcall(require, name)
+  if ok then
+    module.setup(opts)
+  end
+end
+
 local plugins = {
   {
-    "williamboman/mason-lspconfig.nvim",
-    cmd = { "LspInstall", "LspUninstall" },
+    "williamboman/mason.nvim",
+    cmd = { "Mason", "MasonUpdate", "MasonLog", "MasonInstall", "MasonUninstall", "MasonUninstallAll" },
     lazy = true,
-    dependencies = "mason.nvim",
-    config = function()
-      lazip("mason-lspconfig", {})
+    opts = function()
+      return require("plugins.config.mason").config
+    end,
+    config = function(_, opts)
+      lazip("mason", opts)
     end
   },
   {
-    "williamboman/mason.nvim",
-    cmd = { "MasonInstall", "MasonUninstall", "MasonUninstallAll" },
-    build = function()
-      pcall(function()
-        require("mason-registry").refresh()
-      end)
-    end,
+    "williamboman/mason-lspconfig.nvim",
     lazy = true,
+    cmd = { "LspInstall", "LspUninstall" },
+    dependencies = "mason.nvim",
+    config = function()
+      require("mason-lspconfig").setup()
+    end
   },
   {
     "neovim/nvim-lspconfig",
-    lazy = true,
-    dependencies = { "mason-lspconfig.nvim", "nlsp-settings.nvim" },
+    dependencies = { "mason-lspconfig.nvim" },
+    config = function()
+      require("plugins.config.lspconfig")
+    end
   },
   {
     "nvim-treesitter/nvim-treesitter",
-    cmd = { "TSInstall", "TSBufEnable", "TSBufDisable", "TSModuleInfo" },
-    build = ":TSUpdate",
-    opts = function()
-      return require("plugins.config.treesiter")
-    end,
-    config = function(_, opts)
-      require("nvim-treesitter.configs").setup(opts)
+    cmd = { "TSInstall", "TSUpdate", "TSUninstall" },
+    run = ":TSUpdate",
+    config = function()
+      require("nvim-treesitter.configs").setup({
+        ensure_installed = { "c", "lua", "rust" },
+        auto_install = true,
+        heilight = {
+          enable = true
+        }
+      })
     end
   },
   {
@@ -47,10 +59,10 @@ local plugins = {
     end
   },
   {
-    "alvarosevilla95/luatab.nvim",
+    "romgrk/barbar.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
-    config = function(_, opts)
-      lazip("luatab", opts)
+    init = function()
+      vim.g.barbar_auto_setup = false
     end
   },
   {
@@ -83,7 +95,7 @@ local plugins = {
   {
     "nvim-telescope/telescope.nvim",
     cmd = { "Telescope" },
-    dependencies = { { "nvim-lua/plenary.nvim" } },
+    dependencies = "nvim-lua/plenary.nvim",
     keys = {
       { "<leader>ff", "<cmd>Telescope find_files<CR>", desc = "find files" },
       { "<leader>fg", "<cmd>Telescope live_grep<CR>",  desc = "live grep" },
@@ -105,9 +117,15 @@ local plugins = {
       vim.cmd [[colorscheme tokyonight]]
     end
   },
-  { "utilyre/barbecue.nvim", },
-  { "smiteshp/nvim-navic", },
-  { "tamago324/nlsp-settings.nvim", cmd = "LspSettings", lazy = true },
+  {
+    "utilyre/barbecue.nvim",
+    name = "barbecue",
+    dependencies = { "smiteshp/nvim-navic", "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("barbecue").setup()
+    end
+  },
+  { "github/copilot.vim" },
 }
 
 require("lazy").setup(plugins)
