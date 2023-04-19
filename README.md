@@ -55,5 +55,5 @@ git clone https://github.com/jeffercbs/nvim.git ~/.config/nvim --depth 1 && nvim
   rm -rf ~/.cache/nvim
 
   # windows
-  Invoke-WebRequest https://raw.githubusercontent.com/jeffercbs/nvim/main/scripts/wins/uninstall.ps1 -UseBasicParsing | Invoke-Expression
+  Invoke-WebRequest https://raw.githubusercontent.com/jeffercbs/nvim/main/scripts/win/uninstall.ps1 -UseBasicParsing | Invoke-Expression
 ```
