@@ -1,4 +1,4 @@
-local config = require("plugins.lsp.config")
+local config = require("custom.lsp")
 
 local config = {
   on_attach = config.on_attach,
